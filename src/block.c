@@ -9,8 +9,6 @@ t_block	new_block(size_t size, t_zone zone)
 	{
 		block = NEXT_BLOCK(block);
 	}
-	// if (!IN_ZONE(block, zone))
-	// 	return (NULL);
 	block->prevsz = 0;
 	block->header = size | 0x1;
 	zone->free_size -= size;
@@ -78,6 +76,8 @@ t_block	merge_block(t_block block, t_zone zone)
 	if (IN_ZONE(next, zone) && !INUSE(next))
 	{
 		block->header += next->header;
+		if (GET_SIZE(next) == 0)
+			block->header += (size_t)((char *)zone + zone->size) - (size_t)next;
 		next->header = 0;
 		next->prevsz = 0;
 	}
@@ -107,19 +107,19 @@ t_block	resize_block(t_block block, t_zone zone, size_t size)
 	return (block);
 }
 
-void	free_block(void *ptr, t_zone zone)
+void	free_block(t_block block, t_zone zone)
 {
-	t_block block;
 	t_block	next;
 
 	if (zone == NULL)
 		return ;
-	block = (t_block)(ptr - BLOCK_SIZE);
 	block->header &= ~0x1;
 	block = merge_block(block, zone);
 	next = NEXT_BLOCK(block);
-	if (IN_ZONE(next, zone))
+	if (IN_ZONE(next, zone) && INUSE(next))
+	{
 		next->prevsz = block->header;
+	}
 	zone->blocks--;
 	zone->free_size += GET_SIZE(block);
 	if (zone->blocks == 0)

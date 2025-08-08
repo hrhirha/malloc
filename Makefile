@@ -3,8 +3,9 @@ ifeq ($(HOSTTYPE),)
 endif
 
 CC = gcc
-CFLAGS = -Iinclude -fPIC -g #-fsanitize=address # -Wall -Wextra -Werror
+CFLAGS = -Iinclude -fPIC -lpthread -Wall -Wextra -Werror -O0 -g #-fsanitize=address
 NAME = libft_malloc_$(HOSTTYPE).so
+LIBNAME = libft_malloc.so
 SRC =	malloc.c  \
 		free.c    \
 		realloc.c \
@@ -18,6 +19,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -shared $^ -o $@
+	ln -s $(NAME) $(LIBNAME)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -29,8 +31,8 @@ fclean: clean
 	rm -rf $(NAME)
 
 test: $(NAME)
-	@gcc -O0 -g -Iinclude main.c -o mal
-	@LD_PRELOAD=./$(NAME) ./mal
+	@gcc -O0 -Iinclude main.c -o mal
+	@LD_PRELOAD=./$(NAME) LD_LIBRARY_PATH=. ASAN_OPTIONS=verify_asan_link_order=0 ./mal
 	@#rm ./mal
 
 cmd: $(NAME)

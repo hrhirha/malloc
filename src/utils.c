@@ -1,6 +1,6 @@
 #include "malloc.h"
 
-void	putn(size_t n, int base)
+void	ft_putn(size_t n, int base)
 {
 	const char	digits[] = "0123456789abcdef";
 	char		s[16];
@@ -14,7 +14,8 @@ void	putn(size_t n, int base)
 		if (n == 0)
 			break ;
 	}
-	base == 16 && write(1, "0x", 2);
+	if (base == 16)
+		write(1, "0x", 2);
 	while(i--)
 		write(1, &s[i], 1);
 }

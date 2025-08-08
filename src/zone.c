@@ -5,12 +5,12 @@ t_zone	new_zone(size_t size, t_type type)
 	size_t	zone_size;
 	t_zone	new;
 
-	zone_size = size + (PAGE_SIZE - 0x1) & ~(PAGE_SIZE - 0x1);
+	zone_size =  ALIGN(size, PAGE_SIZE);
 	if (type == TINY)
-		zone_size = TINY_ZONSZ;
+		zone_size = TINY_ZONE_SIZE;
 	if (type == SMALL)
-		zone_size = SMAL_ZONSZ;
-	new = (t_zone)mmap(0, zone_size, MMAP_PROT, MMAP_FLAG, -1, 0);
+		zone_size = SMAL_ZONE_SIZE;
+	new = (t_zone)mmap(0, zone_size, MMAP_PROT, MMAP_FLAGS, -1, 0);
 	if (new == MAP_FAILED)
 		return (NULL);
 	new->size = zone_size;
@@ -66,7 +66,7 @@ t_zone	get_zone_by_type(size_t size, t_type type)
 	return zone;
 }
 
-int	unmap_zone(t_zone zone)
+void	unmap_zone(t_zone zone)
 {
 	if (zone->next)
 		zone->next->prev = zone->prev;
